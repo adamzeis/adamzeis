@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oval Idle - Medieval Expanded</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+      background-color: #f0e1d6;
+    }
+    h1 {
+      color: #4b3f1b;
+    }
+    .button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      background-color: #4b3f1b;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .button:hover {
+      background-color: #8a6b3d;
+    }
+    .resource {
+      font-size: 20px;
+      margin: 10px;
+    }
+    .building {
+      margin: 15px;
+      padding: 5px;
+      background-color: #e7d7a8;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Oval Idle - Medieval Expanded</h1>
+  
+  <div class="resource">
+    Wood: <span id="wood">0</span> | Stone: <span id="stone">0</span> | Food: <span id="food">0</span> | Gold: <span id="gold">0</span> | Iron: <span id="iron">0</span> | Gems: <span id="gems">0</span> | Clay: <span id="clay">0</span> | Water: <span id="water">0</span>
+  </div>
+  
+  <button id="collectWood" class="button">Collect Wood</button>
+  <button id="collectStone" class="button">Collect Stone</button>
+  <button id="collectFood" class="button">Collect Food</button>
+  <button id="collectGold" class="button">Collect Gold</button>
+  <button id="collectIron" class="button">Collect Iron</button>
+
+  <h2>Build Structures</h2>
+  <div class="building">
+    <button id="buildWoodcutter" class="button">Build Woodcutter (Cost: 10 Wood)</button>
+    <button id="buildMine" class="button">Build Mine (Cost: 20 Wood, 10 Stone)</button>
+    <button id="buildFarm" class="button">Build Farm (Cost: 10 Wood, 5 Stone)</button>
+    <button id="buildBakery" class="button">Build Bakery (Cost: 20 Wood, 10 Food)</button>
+    <button id="buildBlacksmith" class="button">Build Blacksmith (Cost: 50 Wood, 20 Iron)</button>
+    <button id="buildQuarry" class="button">Build Quarry (Cost: 30 Wood, 15 Stone)</button>
+  </div>
+
+  <h2>Prestige</h2>
+  <button id="prestige" class="button" disabled>Prestige (Cost: 1000 Food)</button>
+
+  <script>
+    // Initialize resources
+    let wood = 0;
+    let stone = 0;
+    let food = 0;
+    let gold = 0;
+    let iron = 0;
+    let gems = 0;
+    let clay = 0;
+    let water = 0;
+
+    // Building counters
+    let woodcutters = 0;
+    let mines = 0;
+    let farms = 0;
+    let bakeries = 0;
+    let blacksmiths = 0;
+    let quarries = 0;
+    let townCenter = false;
+
+    // Resource production rates
+    let foodPerSecond = 0;
+    let woodPerSecond = 0;
+    let stonePerSecond = 0;
+    let goldPerSecond = 0;
+    let ironPerSecond = 0;
+
+    // Upgrade costs
+    const woodcutterCost = 10;
+    const mineCostWood = 20, mineCostStone = 10;
+    const farmCostWood = 10, farmCostStone = 5;
+    const bakeryCostWood = 20, bakeryCostFood = 10;
+    const blacksmithCostWood = 50, blacksmithCostIron = 20;
+    const quarryCostWood = 30, quarryCostStone = 15;
+    const prestigeCost = 1000;
+
+    // Update resource display
+    function updateDisplay() {
+      document.getElementById('wood').innerText = wood;
+      document.getElementById('stone').innerText = stone;
+      document.getElementById('food').innerText = food;
+      document.getElementById('gold').innerText = gold;
+      document.getElementById('iron').innerText = iron;
+      document.getElementById('gems').innerText = gems;
+      document.getElementById('clay').innerText = clay;
+      document.getElementById('water').innerText = water;
+
+      // Enable or disable buttons based on resources
+      document.getElementById('buildWoodcutter').disabled = wood < woodcutterCost;
+      document.getElementById('buildMine').disabled = wood < mineCostWood || stone < mineCostStone;
+      document.getElementById('buildFarm').disabled = wood < farmCostWood || stone < farmCostStone;
+      document.getElementById('buildBakery').disabled = wood < bakeryCostWood || food < bakeryCostFood;
+      document.getElementById('buildBlacksmith').disabled = wood < blacksmithCostWood || iron < blacksmithCostIron;
+      document.getElementById('buildQuarry').disabled = wood < quarryCostWood || stone < quarryCostStone;
+      document.getElementById('prestige').disabled = food < prestigeCost;
+    }
+
+    // Collect resources on button click
+    document.getElementById('collectWood').addEventListener('click', () => {
+      wood++;
+      updateDisplay();
+    });
+    document.getElementById('collectStone').addEventListener('click', () => {
+      stone++;
+      updateDisplay();
+    });
+    document.getElementById('collectFood').addEventListener('click', () => {
+      food++;
+      updateDisplay();
+    });
+    document.getElementById('collectGold').addEventListener('click', () => {
+      gold++;
+      updateDisplay();
+    });
+    document.getElementById('collectIron').addEventListener('click', () => {
+      iron++;
+      updateDisplay();
+    });
+
+    // Build Woodcutter
+    document.getElementById('buildWoodcutter').addEventListener('click', () => {
+      if (wood >= woodcutterCost) {
+        wood -= woodcutterCost;
+        woodcutters++;
+        woodPerSecond += 1;  // Increase wood per second
+        updateDisplay();
+      }
+    });
+
+    // Build Mine
+    document.getElementById('buildMine').addEventListener('click', () => {
+      if (wood >= mineCostWood && stone >= mineCostStone) {
+        wood -= mineCostWood;
+        stone -= mineCostStone;
+        mines++;
+        ironPerSecond += 1;  // Increase iron per second
+        updateDisplay();
+      }
+    });
+
+    // Build Bakery
+    document.getElementById('buildBakery').addEventListener('click', () => {
+      if (wood >= bakeryCostWood && food >= bakeryCostFood) {
+        wood -= bakeryCostWood;
+        food -= bakeryCostFood;
+        bakeries++;
+        foodPerSecond += 2;  // Increase food per second
+        updateDisplay();
+      }
+    });
+
+    // Build Blacksmith
+    document.getElementById('buildBlacksmith').addEventListener('click', () => {
+      if (wood >= blacksmithCostWood && iron >= blacksmithCostIron) {
+        wood -= blacksmithCostWood;
+        iron -= blacksmithCostIron;
+        blacksmiths++;
+        goldPerSecond += 1;  // Increase gold per second
+        updateDisplay();
+      }
+    });
+
+    // Build Quarry
+    document.getElementById('buildQuarry').addEventListener('click', () => {
+      if (wood >= quarryCostWood && stone >= quarryCostStone) {
+        wood -= quarryCostWood;
+        stone -= quarryCostStone;
+        quarries++;
+        stonePerSecond += 2;  // Increase stone per second
+        updateDisplay();
+      }
+    });
+
+    // Prestige (reset game)
+    document.getElementById('prestige').addEventListener('click', () => {
+      if (food >= prestigeCost) {
+        food -= prestigeCost;
+        wood = 0;
+        stone = 0;
+        food = 0;
+        gold = 0;
+        iron = 0;
+        gems = 0;
+        clay = 0;
+        water = 0;
+        woodcutters = 0;
+        mines = 0;
+        farms = 0;
+        bakeries = 0;
+        blacksmiths = 0;
+        quarries = 0;
+        townCenter = false;
+        foodPerSecond = 0;
+        woodPerSecond = 0;
+        stonePerSecond = 0;
+        goldPerSecond = 0;
+        ironPerSecond = 0;
+        updateDisplay();
+      }
+    });
+
+    // Offline progression: Adds resources over time when the player is away
+    function offlineProgress() {
+      if (townCenter) {
+        wood += woodPerSecond;
+        stone += stonePerSecond;
+        food += foodPerSecond;
+        gold += goldPerSecond;
+        iron += ironPerSecond;
+        updateDisplay();
+      }
+    }
+
+    // Set interval for offline progression (every 10 seconds)
+    setInterval(offlineProgress, 10000);
+
+    // Initial display update
+    updateDisplay();
+
+  </script>
+
+</body>
+</html>
